@@ -1,0 +1,96 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { sortPosts } from "../lib/posts";
+
+const posts = sortPosts(await getCollection("posts"));
+const lead = posts.find((post) => post.data.featured) ?? posts[0];
+const railPosts = posts.filter((post) => post.id !== lead.id).slice(0, 3);
+const cards = posts.filter((post) => post.id !== lead.id).slice(0, 3);
+---
+
+<BaseLayout
+  title="Framefield Notes | AI 創作內容站"
+  description="Framefield Notes 是一個以 Markdown 管理文章的 AI 創作內容站。"
+>
+  <main>
+    <section class="front-grid">
+      <article class="lead-story">
+        {lead.data.cover && (
+          <a class="lead-media" href={`/articles/${lead.id}/`}>
+            <img src={lead.data.cover} alt={lead.data.coverAlt ?? ""} />
+          </a>
+        )}
+        <div class="lead-copy">
+          <p class="eyebrow">本週專題</p>
+          <h1><a href={`/articles/${lead.id}/`}>{lead.data.title}</a></h1>
+          <p>{lead.data.description}</p>
+          <div class="byline">
+            <span class="avatar" aria-hidden="true">{lead.data.authorInitials}</span>
+            <span>由 {lead.data.author} 撰寫</span>
+            <span>{lead.data.readingTime}</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="front-rail" aria-label="最新文章">
+        <div class="section-head compact">
+          <p class="eyebrow">最新更新</p>
+          <a href="/articles/">全部文章</a>
+        </div>
+        {
+          railPosts.map((post, index) => (
+            <a class="rail-story" href={`/articles/${post.id}/`}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{post.data.title}</strong>
+            </a>
+          ))
+        }
+        <form class="mini-subscribe">
+          <label for="front-email">每週摘要</label>
+          <div>
+            <input id="front-email" type="email" placeholder="name@example.com" />
+            <button type="submit">訂閱</button>
+          </div>
+        </form>
+      </aside>
+    </section>
+
+    <section class="story-band">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">編輯選讀</p>
+          <h2>文章現在從 Markdown 自動長出來</h2>
+        </div>
+        <p>首頁卡片會讀取文章標題、摘要、分類與封面，後續更新不必再改多份 HTML。</p>
+      </div>
+      <div class="story-grid">
+        {cards.map((post) => <PostCard post={post} />)}
+      </div>
+    </section>
+
+    <section class="topic-strip" aria-label="內容分類">
+      <a href="/articles/">
+        <span>01</span>
+        <strong>影像生成</strong>
+        <small>評測與 prompt</small>
+      </a>
+      <a href="/articles/">
+        <span>02</span>
+        <strong>設計流程</strong>
+        <small>從 brief 到交付</small>
+      </a>
+      <a href="/articles/">
+        <span>03</span>
+        <strong>品牌案例</strong>
+        <small>素材與版型拆解</small>
+      </a>
+      <a href="/about/">
+        <span>04</span>
+        <strong>編輯室</strong>
+        <small>作者與合作</small>
+      </a>
+    </section>
+  </main>
+</BaseLayout>

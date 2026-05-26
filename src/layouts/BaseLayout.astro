@@ -1,0 +1,29 @@
+---
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  footerNote?: string;
+}
+
+const { title, description, footerNote } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <SiteHeader />
+    <slot />
+    <SiteFooter note={footerNote} />
+    <script src="/scripts/site.js" is:inline></script>
+  </body>
+</html>

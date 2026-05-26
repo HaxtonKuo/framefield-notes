@@ -1,0 +1,11 @@
+---
+interface Props {
+  categories: string[];
+}
+
+const { categories } = Astro.props;
+---
+
+<p class="tag-row">
+  {categories.map((category) => <span>{category}</span>)}
+</p>

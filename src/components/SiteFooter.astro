@@ -1,0 +1,19 @@
+---
+interface Props {
+  note?: string;
+}
+
+const { note = "可替換成你的站名、作者資訊、社群連結與版權文字。" } = Astro.props;
+---
+
+<footer class="site-footer">
+  <div>
+    <strong>Framefield Notes</strong>
+    <p>{note}</p>
+  </div>
+  <div class="footer-links">
+    <a href="/articles/">文章</a>
+    <a href="/about/">合作</a>
+    <a href="/articles/image-workflow/">專題</a>
+  </div>
+</footer>

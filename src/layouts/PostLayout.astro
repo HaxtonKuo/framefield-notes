@@ -1,0 +1,65 @@
+---
+import type { Post } from "../lib/posts";
+import { formatDate } from "../lib/posts";
+import BaseLayout from "./BaseLayout.astro";
+import PostTags from "../components/PostTags.astro";
+
+interface Props {
+  post: Post;
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { post, headings } = Astro.props;
+const toc = headings.filter((heading) => heading.depth === 2);
+---
+
+<BaseLayout
+  title={`${post.data.title} | Framefield Notes`}
+  description={post.data.description}
+  footerNote="文章內容目前是 Markdown 範例稿，方便你替換。"
+>
+  <main class="article-page">
+    <article>
+      <header class="article-hero">
+        <PostTags categories={post.data.categories} />
+        <h1>{post.data.title}</h1>
+        <p class="article-dek">{post.data.description}</p>
+        <div class="article-meta">
+          <span class="avatar" aria-hidden="true">{post.data.authorInitials}</span>
+          <div>
+            <strong>{post.data.author}</strong>
+            <span>
+              發布於 {formatDate(post.data.pubDate)}
+              {post.data.updatedDate && ` · 更新於 ${formatDate(post.data.updatedDate)}`}
+            </span>
+          </div>
+        </div>
+        {
+          post.data.cover && (
+            <figure>
+              <img src={post.data.cover} alt={post.data.coverAlt ?? ""} />
+            </figure>
+          )
+        }
+      </header>
+
+      <div class="article-layout">
+        <aside class="article-aside">
+          <p class="eyebrow">本文段落</p>
+          {toc.map((heading) => <a href={`#${heading.slug}`}>{heading.text}</a>)}
+        </aside>
+        <div class="article-body">
+          <slot />
+        </div>
+      </div>
+    </article>
+
+    <section class="next-read">
+      <div>
+        <p class="eyebrow">接著閱讀</p>
+        <h2>回到文章庫，挑下一篇要更新的內容</h2>
+      </div>
+      <a href="/articles/">回文章列表</a>
+    </section>
+  </main>
+</BaseLayout>

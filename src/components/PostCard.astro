@@ -1,0 +1,49 @@
+---
+import type { Post } from "../lib/posts";
+import PostTags from "./PostTags.astro";
+
+interface Props {
+  post: Post;
+  variant?: "story" | "archive";
+}
+
+const { post, variant = "story" } = Astro.props;
+const href = `/articles/${post.id}/`;
+---
+
+{
+  variant === "archive" ? (
+    <article
+      class="archive-card"
+      data-search={`${post.data.title} ${post.data.description} ${post.data.author} ${post.data.categories.join(" ")} ${post.data.coverAlt ?? ""}`}
+    >
+      {post.data.cover ? (
+        <a href={href}>
+          <img src={post.data.cover} alt={post.data.coverAlt ?? ""} />
+        </a>
+      ) : (
+        <div class="archive-placeholder" aria-hidden="true">Brief</div>
+      )}
+      <div>
+        <PostTags categories={post.data.categories} />
+        <h2><a href={href}>{post.data.title}</a></h2>
+        <p>{post.data.description}</p>
+        <small>{post.data.author} · {post.data.readingTime}</small>
+      </div>
+    </article>
+  ) : (
+    <article class:list={["story-card", !post.data.cover && "text-card"]}>
+      {post.data.cover && (
+        <a href={href}>
+          <img src={post.data.cover} alt={post.data.coverAlt ?? ""} />
+        </a>
+      )}
+      <div class="card-copy">
+        <PostTags categories={post.data.categories} />
+        <h3><a href={href}>{post.data.title}</a></h3>
+        <p>{post.data.description}</p>
+        {!post.data.cover && <a class="text-link" href={href}>閱讀文章</a>}
+      </div>
+    </article>
+  )
+}

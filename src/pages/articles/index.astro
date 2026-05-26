@@ -1,0 +1,30 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { sortPosts } from "../../lib/posts";
+
+const posts = sortPosts(await getCollection("posts"));
+---
+
+<BaseLayout
+  title="文章 | Framefield Notes"
+  description="Framefield Notes 的文章列表頁。"
+  footerNote="把你的分類、作者與文章資料換進 Markdown 即可。"
+>
+  <main class="archive-page">
+    <section class="archive-intro">
+      <p class="eyebrow">文章庫</p>
+      <h1>評測、教學、案例與工作筆記</h1>
+      <p>每篇文章都來自 Markdown 檔案，讀者也可用關鍵字快速縮小範圍。</p>
+      <label class="search-field">
+        <span>搜尋</span>
+        <input data-article-search type="search" placeholder="輸入主題、欄目或作者" />
+      </label>
+    </section>
+
+    <section class="archive-list" aria-live="polite">
+      {posts.map((post) => <PostCard post={post} variant="archive" />)}
+    </section>
+  </main>
+</BaseLayout>
