@@ -169,7 +169,7 @@ function htmlPage(message = "") {
           <label>
             封面圖片
             <input name="cover" type="file" accept="image/*" />
-            <small>可不放。放了會複製到 public/assets/images。</small>
+            <small>可不放。請上傳壓縮後網頁圖；原始大圖請放外部雲端。</small>
           </label>
           <label>
             封面描述

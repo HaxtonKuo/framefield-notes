@@ -3,6 +3,7 @@ const pathname = Astro.url.pathname;
 const nav = [
   { href: "/", label: "首頁", current: pathname === "/" },
   { href: "/articles/", label: "文章", current: pathname.startsWith("/articles/") },
+  { href: "/downloads/", label: "下載", current: pathname === "/downloads/" },
   { href: "/articles/image-workflow/", label: "專題", current: pathname === "/articles/image-workflow/" },
   { href: "/about/", label: "關於", current: pathname === "/about/" },
 ];

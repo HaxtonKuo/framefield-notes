@@ -1,0 +1,62 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { downloads } from "../data/downloads";
+
+const featured = downloads.find((item) => item.isFeatured) ?? downloads[0];
+const rest = downloads.filter((item) => item !== featured);
+---
+
+<BaseLayout
+  title="下載資源 | Framefield Notes"
+  description="AI 設計指令包、素材包、PDF 與外部下載資源。"
+  footerNote="大型檔案放在 Google Drive 或外部雲端，網站只保留入口。"
+>
+  <main class="downloads-page">
+    <section class="downloads-hero">
+      <div>
+        <p class="eyebrow">下載資源</p>
+        <h1>指令包、素材與教學檔案集中管理</h1>
+      </div>
+      <p>
+        這一頁用來放 Google Drive、Dropbox、Cloudflare R2 或銷售頁連結。
+        GitHub 只保留網站內容與輕量圖片，避免未來檔案太大。
+      </p>
+    </section>
+
+    {
+      featured && (
+        <section class="download-feature">
+          <div>
+            <p class="tag-row">
+              <span>{featured.category}</span>
+              <span>{featured.fileType}</span>
+            </p>
+            <h2>{featured.title}</h2>
+            <p>{featured.description}</p>
+            <small>更新日期：{featured.updatedAt}</small>
+          </div>
+          <a href={featured.url} target="_blank" rel="noreferrer">開啟下載</a>
+        </section>
+      )
+    }
+
+    <section class="download-grid" aria-label="下載清單">
+      {
+        rest.map((item) => (
+          <article class="download-card">
+            <p class="tag-row">
+              <span>{item.category}</span>
+              <span>{item.fileType}</span>
+            </p>
+            <h2>{item.title}</h2>
+            <p>{item.description}</p>
+            <div class="download-card-foot">
+              <small>更新日期：{item.updatedAt}</small>
+              <a href={item.url} target="_blank" rel="noreferrer">開啟</a>
+            </div>
+          </article>
+        ))
+      }
+    </section>
+  </main>
+</BaseLayout>

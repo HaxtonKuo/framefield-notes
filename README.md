@@ -53,12 +53,34 @@ npm run import:links -- https://example.com/article
 The GitHub Actions workflow `.github/workflows/daily-links.yml` can run the same
 importer manually or on a daily schedule after these changes are pushed to GitHub.
 
+## Content Asset Rules
+
+Read [CONTENT_ASSETS.md](./CONTENT_ASSETS.md) before uploading many articles,
+images, prompt packs, videos, or downloadable files.
+
+Short version:
+
+- GitHub stores code, Markdown articles, and compressed web images.
+- External storage stores original AI images, videos, ZIP files, prompt packs,
+  and client/source files.
+- Use `sourceUrl` for imported or referenced external articles.
+- Do not copy full external articles into this site.
+
 ## Main Pages
 
 - `src/pages/index.astro`: homepage and featured story layout
 - `src/pages/articles/index.astro`: article archive with keyword filtering
 - `src/pages/articles/[id].astro`: Markdown article route
+- `src/pages/downloads.astro`: Google Drive/download resource page
 - `src/pages/about.astro`: publication and author page
+
+## Download Resources
+
+Edit `src/data/downloads.ts` to add Google Drive, Dropbox, Cloudflare R2,
+Gumroad, Lemon Squeezy, or other download links.
+
+Keep large files outside GitHub. The site should only store the download title,
+description, category, update date, and external URL.
 
 ## Add A Post
 

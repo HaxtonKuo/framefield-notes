@@ -199,7 +199,8 @@ main {
 .lead-copy h1,
 .article-hero h1,
 .archive-intro h1,
-.about-intro h1 {
+.about-intro h1,
+.downloads-hero h1 {
   margin: 0;
   font-family:
     Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
@@ -742,6 +743,94 @@ blockquote {
   align-items: end;
 }
 
+.downloads-page {
+  width: min(1120px, calc(100% - 48px));
+}
+
+.downloads-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.75fr);
+  gap: 38px;
+  align-items: end;
+}
+
+.downloads-hero > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.download-feature {
+  margin-top: 52px;
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  align-items: center;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  padding: clamp(24px, 4vw, 44px) 0;
+}
+
+.download-feature h2,
+.download-card h2 {
+  margin: 0 0 10px;
+  font: 500 clamp(28px, 3vw, 46px) / 1.1 Inter, "Noto Sans TC", system-ui, sans-serif;
+}
+
+.download-feature p,
+.download-card p {
+  color: var(--muted);
+}
+
+.download-feature a,
+.download-card a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  padding: 0 18px;
+  font-weight: 700;
+}
+
+.download-grid {
+  margin-top: 34px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.download-card {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  padding: 22px 0 0;
+}
+
+.download-card h2 {
+  font-size: 28px;
+}
+
+.download-card-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-top: 22px;
+}
+
+.download-card-foot small {
+  color: var(--muted);
+}
+
+.download-card .download-card-foot a {
+  min-height: 40px;
+  background: transparent;
+  color: var(--ink);
+}
+
 .about-intro > p {
   margin: 0;
   color: var(--muted);
@@ -828,7 +917,8 @@ blockquote {
 
   .front-grid,
   .archive-page,
-  .about-intro {
+  .about-intro,
+  .downloads-hero {
     grid-template-columns: 1fr;
   }
 
@@ -889,6 +979,7 @@ blockquote {
   .section-head,
   .next-read,
   .contact-panel,
+  .download-feature,
   .site-footer,
   .mini-subscribe div,
   .contact-form {
@@ -899,6 +990,7 @@ blockquote {
   .story-grid,
   .editor-grid,
   .topic-strip,
+  .download-grid,
   .archive-card {
     grid-template-columns: 1fr;
   }
