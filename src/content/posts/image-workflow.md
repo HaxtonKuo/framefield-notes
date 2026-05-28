@@ -4,7 +4,7 @@ description: "整理 AI 影像工具在設計流程中的實際用法，從任�
 pubDate: 2026-05-22
 updatedDate: 2026-05-22
 author: "郭豪"
-authorInitials: "Kouhao"
+authorInitials: "KH"
 readingTime: "8 分鐘閱讀"
 categories: ["影像生成", "工作流", "可替換稿"]
 cover: "/assets/images/hero-workflow.jpg"

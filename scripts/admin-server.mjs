@@ -148,7 +148,7 @@ function htmlPage(message = "") {
           </label>
           <label>
             作者縮寫
-            <input name="authorInitials" value="Kouhao" />
+            <input name="authorInitials" value="KH" />
           </label>
         </div>
         <div class="grid">

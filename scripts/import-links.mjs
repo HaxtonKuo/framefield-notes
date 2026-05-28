@@ -10,7 +10,7 @@ const args = process.argv.slice(2);
 const options = {
   file: defaultLinksFile,
   author: "郭豪",
-  authorInitials: "Kouhao",
+  authorInitials: "KH",
   category: "每日精選",
   dryRun: false,
 };
