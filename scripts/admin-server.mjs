@@ -144,11 +144,11 @@ function htmlPage(message = "") {
         <div class="grid">
           <label>
             作者
-            <input name="author" required value="林予澄" />
+            <input name="author" required value="郭豪" />
           </label>
           <label>
             作者縮寫
-            <input name="authorInitials" value="YL" />
+            <input name="authorInitials" value="Kouhao" />
           </label>
         </div>
         <div class="grid">
