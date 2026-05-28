@@ -50,6 +50,15 @@ const toc = headings.filter((heading) => heading.depth === 2);
         </aside>
         <div class="article-body">
           <slot />
+          {
+            post.data.sourceUrl && (
+              <p class="source-link">
+                <a href={post.data.sourceUrl} target="_blank" rel="noreferrer">
+                  閱讀原文
+                </a>
+              </p>
+            )
+          }
         </div>
       </div>
     </article>

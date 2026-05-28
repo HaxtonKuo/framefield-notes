@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "admin": "node scripts/admin-server.mjs",
+    "import:links": "node scripts/import-links.mjs",
+    "import:links:dry": "node scripts/import-links.mjs --dry-run",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "astro": "astro"

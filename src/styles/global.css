@@ -659,6 +659,17 @@ button,
   font: inherit;
 }
 
+.source-link {
+  margin-top: 36px !important;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.source-link a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .prompt-box {
   margin-top: 28px;
   border-left: 4px solid var(--accent);

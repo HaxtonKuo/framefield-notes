@@ -27,6 +27,32 @@ http://127.0.0.1:8787/admin
 The admin form writes Markdown posts into `src/content/posts/` and copies uploaded
 cover images into `public/assets/images/`.
 
+## Import Links
+
+Paste article URLs into `data/import-links.txt`, one URL per line, then run:
+
+```sh
+npm run import:links
+```
+
+The importer creates Markdown draft posts in `src/content/posts/` with title,
+description, source URL, and a short source note. It does not copy full articles.
+
+Preview without writing files:
+
+```sh
+npm run import:links:dry
+```
+
+You can also pass URLs directly:
+
+```sh
+npm run import:links -- https://example.com/article
+```
+
+The GitHub Actions workflow `.github/workflows/daily-links.yml` can run the same
+importer manually or on a daily schedule after these changes are pushed to GitHub.
+
 ## Main Pages
 
 - `src/pages/index.astro`: homepage and featured story layout

@@ -1,0 +1,3 @@
+# Paste one article URL per line.
+# Example:
+# https://example.com/article

@@ -15,6 +15,17 @@ const posts = defineCollection({
     categories: z.array(z.string()),
     cover: z.string().optional(),
     coverAlt: z.string().optional(),
+    sourceUrl: z
+      .string()
+      .refine((value) => {
+        try {
+          new URL(value);
+          return true;
+        } catch {
+          return false;
+        }
+      }, "sourceUrl must be a valid URL")
+      .optional(),
     featured: z.boolean().default(false),
   }),
 });
