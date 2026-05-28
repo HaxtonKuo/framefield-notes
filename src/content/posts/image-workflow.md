@@ -1,10 +1,10 @@
 ---
 title: "把影像模型放進設計流程，而不是只拿來試玩"
-description: "這篇示範稿展示長文文章頁如何以 Markdown 管理段落、圖片、提示詞與章節索引。"
+description: "整理 AI 影像工具在設計流程中的實際用法，從任務定義、範例整理到交付檢查。"
 pubDate: 2026-05-22
 updatedDate: 2026-05-22
-author: "林予澄"
-authorInitials: "YL"
+author: "郭豪"
+authorInitials: "Kouhao"
 readingTime: "8 分鐘閱讀"
 categories: ["影像生成", "工作流", "可替換稿"]
 cover: "/assets/images/hero-workflow.jpg"

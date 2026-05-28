@@ -2,8 +2,8 @@
 title: "把提示詞與交付規格寫進同一份 brief"
 description: "讓 prompt、尺寸、參考圖與交付條件在同一份文件裡被看見。"
 pubDate: 2026-05-08
-author: "林予澄"
-authorInitials: "YL"
+author: "郭豪"
+authorInitials: "Kouhao"
 readingTime: "4 分鐘閱讀"
 categories: ["工作流", "模板"]
 ---
