@@ -48,10 +48,14 @@ GITHUB_TOKEN=github-token-with-repo-access
 GITHUB_OWNER=HaxtonKuo
 GITHUB_REPO=framefield-notes
 GITHUB_BRANCH=main
+OPENAI_API_KEY=sk-your-openai-api-key
+OPENAI_MODEL=gpt-4.1-mini
 ```
 
 Use a fine-grained GitHub token limited to this repository with **Contents:
 Read and write** permission. Do not commit real secrets into GitHub.
+
+`OPENAI_API_KEY` is required only for the online **AI 匯入連結** feature.
 
 ## Import Links
 

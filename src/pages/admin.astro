@@ -145,6 +145,9 @@
         width: 18px;
         min-height: 18px;
       }
+      .import-box textarea {
+        min-height: 140px;
+      }
       @media (max-width: 720px) {
         .grid,
         .post-row {
@@ -190,6 +193,18 @@
           <button id="newButton" class="secondary" type="button">新增文章</button>
         </div>
         <div id="postList" class="post-list"></div>
+      </section>
+
+      <section id="importSection" class="hidden">
+        <h2>AI 匯入連結</h2>
+        <form id="importForm" class="import-box">
+          <label>
+            參考文章連結
+            <textarea name="urls" required placeholder="一行一個網址。AI 會改寫成 2026 趨勢草稿，不會照抄原文。"></textarea>
+          </label>
+          <button type="submit">產生草稿</button>
+          <p class="muted">產生後會寫回 GitHub，Vercel 會自動重新部署。發佈前請再校對。</p>
+        </form>
       </section>
 
       <section id="editorSection" class="hidden">
@@ -267,9 +282,11 @@
       const notice = document.querySelector("#notice");
       const loginSection = document.querySelector("#loginSection");
       const listSection = document.querySelector("#listSection");
+      const importSection = document.querySelector("#importSection");
       const editorSection = document.querySelector("#editorSection");
       const postList = document.querySelector("#postList");
       const loginForm = document.querySelector("#loginForm");
+      const importForm = document.querySelector("#importForm");
       const postForm = document.querySelector("#postForm");
       const logoutButton = document.querySelector("#logoutButton");
       const newButton = document.querySelector("#newButton");
@@ -297,12 +314,14 @@
       function showApp() {
         loginSection.classList.add("hidden");
         listSection.classList.remove("hidden");
+        importSection.classList.remove("hidden");
         logoutButton.classList.remove("hidden");
       }
 
       function showLogin() {
         loginSection.classList.remove("hidden");
         listSection.classList.add("hidden");
+        importSection.classList.add("hidden");
         editorSection.classList.add("hidden");
         logoutButton.classList.add("hidden");
       }
@@ -400,6 +419,29 @@
       postList.addEventListener("click", (event) => {
         const button = event.target.closest("[data-file]");
         if (button) editPost(button.dataset.file);
+      });
+
+      importForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = importForm.querySelector("button");
+        button.disabled = true;
+        button.textContent = "產生中...";
+        try {
+          const { results } = await request("?action=import-ai", {
+            method: "POST",
+            body: JSON.stringify({ urls: new FormData(importForm).get("urls") }),
+          });
+          const created = results.filter((item) => item.filename).length;
+          const skipped = results.filter((item) => item.skipped).length;
+          showNotice(`AI 匯入完成：新增 ${created} 篇，略過 ${skipped} 篇。`);
+          importForm.reset();
+          await loadPosts();
+        } catch (error) {
+          showNotice(error.message, true);
+        } finally {
+          button.disabled = false;
+          button.textContent = "產生草稿";
+        }
       });
 
       postForm.addEventListener("submit", async (event) => {
