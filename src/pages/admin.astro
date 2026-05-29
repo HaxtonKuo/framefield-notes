@@ -1,0 +1,444 @@
+---
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Framefield 線上後台</title>
+    <style>
+      :root {
+        --ink: #101010;
+        --muted: #666;
+        --line: #dedede;
+        --paper: #f7f7f5;
+        --accent: #ff4b1f;
+        --danger: #ba1a1a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #fff;
+        font-family: Inter, "Noto Sans TC", "PingFang TC", system-ui, sans-serif;
+        line-height: 1.55;
+      }
+      header, main {
+        width: min(1040px, calc(100% - 32px));
+        margin-inline: auto;
+      }
+      header {
+        min-height: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        border-bottom: 1px solid var(--line);
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(32px, 5vw, 56px);
+        line-height: 1;
+      }
+      h2 {
+        margin: 0 0 18px;
+        font-size: 28px;
+      }
+      main {
+        padding-block: 42px 76px;
+      }
+      section + section {
+        margin-top: 44px;
+        padding-top: 36px;
+        border-top: 1px solid var(--line);
+      }
+      form {
+        display: grid;
+        gap: 18px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      label {
+        display: grid;
+        gap: 8px;
+        font-weight: 700;
+      }
+      input, textarea {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid var(--line);
+        padding: 12px 14px;
+        font: inherit;
+      }
+      textarea {
+        min-height: 360px;
+        resize: vertical;
+      }
+      button, .button {
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        color: #fff;
+        padding: 0 18px;
+        font: inherit;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .secondary {
+        color: var(--ink);
+        background: #fff;
+      }
+      .danger {
+        border-color: var(--danger);
+        color: var(--danger);
+        background: #fff;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .notice {
+        margin-bottom: 24px;
+        border-left: 4px solid var(--accent);
+        background: var(--paper);
+        padding: 14px 16px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .toolbar,
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .post-list {
+        display: grid;
+        border-top: 1px solid var(--line);
+      }
+      .post-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 18px;
+        align-items: center;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .post-row strong,
+      .post-row small {
+        display: block;
+      }
+      .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .checkbox input {
+        width: 18px;
+        min-height: 18px;
+      }
+      @media (max-width: 720px) {
+        .grid,
+        .post-row {
+          grid-template-columns: 1fr;
+        }
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Framefield 後台</h1>
+        <p class="muted">遠端新增、編輯與刪除文章。</p>
+      </div>
+      <div class="toolbar">
+        <a class="button secondary" href="/" target="_blank" rel="noreferrer">開啟網站</a>
+        <button id="logoutButton" class="secondary hidden" type="button">登出</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="notice" class="notice hidden"></div>
+
+      <section id="loginSection">
+        <h2>登入</h2>
+        <form id="loginForm">
+          <label>
+            管理密碼
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit">登入後台</button>
+        </form>
+      </section>
+
+      <section id="listSection" class="hidden">
+        <div class="toolbar">
+          <h2>文章列表</h2>
+          <button id="newButton" class="secondary" type="button">新增文章</button>
+        </div>
+        <div id="postList" class="post-list"></div>
+      </section>
+
+      <section id="editorSection" class="hidden">
+        <h2 id="editorTitle">新增文章</h2>
+        <form id="postForm">
+          <input name="filename" type="hidden" />
+          <div class="grid">
+            <label>
+              文章標題
+              <input name="title" required />
+            </label>
+            <label>
+              發布日期
+              <input name="pubDate" type="date" required />
+            </label>
+          </div>
+          <label>
+            摘要
+            <input name="description" required />
+          </label>
+          <div class="grid">
+            <label>
+              作者
+              <input name="author" required value="郭豪" />
+            </label>
+            <label>
+              作者縮寫
+              <input name="authorInitials" required value="KH" />
+            </label>
+          </div>
+          <div class="grid">
+            <label>
+              閱讀時間
+              <input name="readingTime" placeholder="留空自動估算" />
+            </label>
+            <label>
+              分類標籤
+              <input name="categories" required placeholder="2026 趨勢, AI 設計" />
+            </label>
+          </div>
+          <div class="grid">
+            <label>
+              封面路徑
+              <input name="cover" placeholder="/assets/images/example.webp" />
+            </label>
+            <label>
+              封面描述
+              <input name="coverAlt" />
+            </label>
+          </div>
+          <label>
+            來源連結
+            <input name="sourceUrl" type="url" />
+          </label>
+          <label class="checkbox">
+            <input name="featured" type="checkbox" />
+            設為首頁主打文章
+          </label>
+          <label>
+            文章正文
+            <textarea name="body" required></textarea>
+          </label>
+          <div class="actions">
+            <button type="submit">儲存文章</button>
+            <button id="deleteButton" class="danger hidden" type="button">刪除文章</button>
+            <button id="cancelButton" class="secondary" type="button">取消</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      // @ts-nocheck
+      const api = "/api/admin";
+      const notice = document.querySelector("#notice");
+      const loginSection = document.querySelector("#loginSection");
+      const listSection = document.querySelector("#listSection");
+      const editorSection = document.querySelector("#editorSection");
+      const postList = document.querySelector("#postList");
+      const loginForm = document.querySelector("#loginForm");
+      const postForm = document.querySelector("#postForm");
+      const logoutButton = document.querySelector("#logoutButton");
+      const newButton = document.querySelector("#newButton");
+      const cancelButton = document.querySelector("#cancelButton");
+      const deleteButton = document.querySelector("#deleteButton");
+      const editorTitle = document.querySelector("#editorTitle");
+
+      function showNotice(message, isError = false) {
+        notice.textContent = message;
+        notice.classList.toggle("hidden", !message);
+        notice.style.borderLeftColor = isError ? "#ba1a1a" : "#ff4b1f";
+      }
+
+      async function request(path, options = {}) {
+        const response = await fetch(`${api}${path}`, {
+          credentials: "include",
+          headers: { "content-type": "application/json" },
+          ...options,
+        });
+        const data = await response.json();
+        if (!response.ok || data.ok === false) throw new Error(data.error || "Request failed");
+        return data;
+      }
+
+      function showApp() {
+        loginSection.classList.add("hidden");
+        listSection.classList.remove("hidden");
+        logoutButton.classList.remove("hidden");
+      }
+
+      function showLogin() {
+        loginSection.classList.remove("hidden");
+        listSection.classList.add("hidden");
+        editorSection.classList.add("hidden");
+        logoutButton.classList.add("hidden");
+      }
+
+      function postPayload() {
+        const form = new FormData(postForm);
+        return {
+          filename: form.get("filename"),
+          title: form.get("title"),
+          description: form.get("description"),
+          pubDate: form.get("pubDate"),
+          author: form.get("author"),
+          authorInitials: form.get("authorInitials"),
+          readingTime: form.get("readingTime"),
+          categories: form.get("categories"),
+          cover: form.get("cover"),
+          coverAlt: form.get("coverAlt"),
+          sourceUrl: form.get("sourceUrl"),
+          featured: form.get("featured") === "on",
+          body: form.get("body"),
+        };
+      }
+
+      function fillPost(post = null) {
+        const data = post?.data || {};
+        postForm.filename.value = post?.filename || "";
+        postForm.title.value = data.title || "";
+        postForm.description.value = data.description || "";
+        postForm.pubDate.value = data.pubDate || new Date().toISOString().slice(0, 10);
+        postForm.author.value = data.author || "郭豪";
+        postForm.authorInitials.value = data.authorInitials || "KH";
+        postForm.readingTime.value = data.readingTime || "";
+        postForm.categories.value = Array.isArray(data.categories) ? data.categories.join(", ") : "2026 趨勢, AI 設計";
+        postForm.cover.value = data.cover || "";
+        postForm.coverAlt.value = data.coverAlt || "";
+        postForm.sourceUrl.value = data.sourceUrl || "";
+        postForm.featured.checked = data.featured === true;
+        postForm.body.value = post?.body || "";
+        deleteButton.classList.toggle("hidden", !post?.filename);
+        editorTitle.textContent = post?.filename ? "編輯文章" : "新增文章";
+      }
+
+      async function loadPosts() {
+        const { posts } = await request("?action=list");
+        postList.innerHTML = posts.length
+          ? posts
+              .map((post) => `<article class="post-row">
+                <div>
+                  <strong>${post.title}</strong>
+                  <small>${post.pubDate || ""} · ${post.author || ""}${post.featured ? " · 首頁主打" : ""}</small>
+                </div>
+                <button class="secondary" type="button" data-file="${post.filename}">編輯</button>
+              </article>`)
+              .join("")
+          : `<p class="muted">目前還沒有文章。</p>`;
+      }
+
+      async function editPost(filename) {
+        const { post } = await request(`?action=post&file=${encodeURIComponent(filename)}`);
+        fillPost(post);
+        editorSection.classList.remove("hidden");
+        editorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          await request("?action=login", {
+            method: "POST",
+            body: JSON.stringify({ password: new FormData(loginForm).get("password") }),
+          });
+          showApp();
+          await loadPosts();
+          showNotice("已登入。");
+        } catch (error) {
+          showNotice(error.message, true);
+        }
+      });
+
+      logoutButton.addEventListener("click", async () => {
+        await request("?action=logout", { method: "POST", body: "{}" }).catch(() => {});
+        showLogin();
+      });
+
+      newButton.addEventListener("click", () => {
+        fillPost();
+        editorSection.classList.remove("hidden");
+        editorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      cancelButton.addEventListener("click", () => {
+        editorSection.classList.add("hidden");
+      });
+
+      postList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-file]");
+        if (button) editPost(button.dataset.file);
+      });
+
+      postForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          const { filename } = await request("?action=save", {
+            method: "POST",
+            body: JSON.stringify(postPayload()),
+          });
+          showNotice(`已儲存 ${filename}，Vercel 會在 GitHub 更新後重新部署。`);
+          editorSection.classList.add("hidden");
+          await loadPosts();
+        } catch (error) {
+          showNotice(error.message, true);
+        }
+      });
+
+      deleteButton.addEventListener("click", async () => {
+        const filename = postForm.filename.value;
+        if (!filename || !confirm(`確定刪除 ${filename}？`)) return;
+        try {
+          await request("?action=delete", {
+            method: "POST",
+            body: JSON.stringify({ filename }),
+          });
+          showNotice(`已刪除 ${filename}，Vercel 會在 GitHub 更新後重新部署。`);
+          editorSection.classList.add("hidden");
+          await loadPosts();
+        } catch (error) {
+          showNotice(error.message, true);
+        }
+      });
+
+      request("?action=session")
+        .then(async () => {
+          showApp();
+          await loadPosts();
+        })
+        .catch(() => showLogin());
+    </script>
+  </body>
+</html>

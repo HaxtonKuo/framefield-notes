@@ -27,6 +27,32 @@ http://127.0.0.1:8787/admin
 The admin form writes Markdown posts into `src/content/posts/` and copies uploaded
 cover images into `public/assets/images/`.
 
+## Online Admin
+
+The site also includes a Vercel-hosted admin page at:
+
+```text
+https://your-domain.com/admin
+```
+
+The online admin is password protected and uses the GitHub API to commit article
+changes back into `src/content/posts/`. After each save or delete, Vercel
+redeploys from GitHub automatically.
+
+Set these Vercel environment variables before using it:
+
+```text
+ADMIN_PASSWORD=your-login-password
+ADMIN_SECRET=a-long-random-session-secret
+GITHUB_TOKEN=github-token-with-repo-access
+GITHUB_OWNER=HaxtonKuo
+GITHUB_REPO=framefield-notes
+GITHUB_BRANCH=main
+```
+
+Use a fine-grained GitHub token limited to this repository with **Contents:
+Read and write** permission. Do not commit real secrets into GitHub.
+
 ## Import Links
 
 Paste article URLs into `data/import-links.txt`, one URL per line, then run:
