@@ -1,14 +1,174 @@
 import { createServer } from "node:http";
 import { Buffer } from "node:buffer";
 import { extname, join } from "node:path";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 
 const root = new URL("..", import.meta.url).pathname;
 const postsDir = join(root, "src/content/posts");
 const imagesDir = join(root, "public/assets/images");
 const port = Number(process.env.ADMIN_PORT || 8787);
 
-function htmlPage(message = "") {
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) return { data: {}, body: content };
+
+  const data = {};
+
+  for (const line of match[1].split(/\r?\n/)) {
+    const divider = line.indexOf(":");
+    if (divider === -1) continue;
+
+    const key = line.slice(0, divider).trim();
+    const raw = line.slice(divider + 1).trim();
+
+    if (raw === "true") {
+      data[key] = true;
+    } else if (raw === "false") {
+      data[key] = false;
+    } else if (raw.startsWith("[") || raw.startsWith("\"")) {
+      data[key] = JSON.parse(raw);
+    } else {
+      data[key] = raw;
+    }
+  }
+
+  return { data, body: match[2].trimEnd() };
+}
+
+function safePostFilename(value) {
+  const filename = String(value ?? "");
+  if (!filename.endsWith(".md") || filename.includes("/") || filename.includes("\\")) {
+    throw new Error("Invalid post filename.");
+  }
+  return filename;
+}
+
+async function readPost(filename) {
+  const safeName = safePostFilename(filename);
+  const content = await readFile(join(postsDir, safeName), "utf8");
+  const parsed = parseFrontmatter(content);
+  return { filename: safeName, ...parsed };
+}
+
+async function listPosts() {
+  const files = await readdir(postsDir).catch(() => []);
+  const posts = await Promise.all(
+    files
+      .filter((file) => file.endsWith(".md"))
+      .map(async (file) => {
+        const post = await readPost(file);
+        return {
+          filename: file,
+          title: post.data.title || file,
+          pubDate: post.data.pubDate || "",
+          author: post.data.author || "",
+          featured: post.data.featured === true,
+        };
+      }),
+  );
+
+  return posts.sort((a, b) => String(b.pubDate).localeCompare(String(a.pubDate)));
+}
+
+function renderPostList(posts) {
+  if (!posts.length) {
+    return `<p class="empty">目前還沒有文章。</p>`;
+  }
+
+  return `<div class="post-list">
+    ${posts
+      .map(
+        (post) => `<article class="post-row">
+          <div>
+            <strong>${escapeHtml(post.title)}</strong>
+            <small>${escapeHtml(post.pubDate)} · ${escapeHtml(post.author)}${post.featured ? " · 首頁主打" : ""}</small>
+          </div>
+          <div class="post-actions">
+            <a class="button-link" href="/admin/edit?file=${encodeURIComponent(post.filename)}">編輯</a>
+            <a class="button-link danger-link" href="/admin/delete?file=${encodeURIComponent(post.filename)}">刪除</a>
+          </div>
+        </article>`,
+      )
+      .join("")}
+  </div>`;
+}
+
+function renderPostForm({ action, buttonLabel, post = {}, body = "", isEdit = false }) {
+  const data = post.data || {};
+  const categories = Array.isArray(data.categories) ? data.categories.join(", ") : "";
+
+  return `<form action="${action}" method="post" enctype="multipart/form-data">
+    <div class="grid">
+      <label>
+        文章標題
+        <input name="title" required value="${escapeHtml(data.title)}" placeholder="例如：一週視覺筆記" />
+      </label>
+      <label>
+        網址代稱
+        <input name="slug" ${isEdit ? "disabled" : ""} placeholder="留空會自動產生，例如 weekly-visual-notes" />
+        ${isEdit ? "<small>編輯既有文章時網址不會變，避免已分享連結失效。</small>" : ""}
+      </label>
+    </div>
+    <label>
+      摘要
+      <input name="description" required value="${escapeHtml(data.description)}" placeholder="會出現在首頁、文章列表與 SEO 描述" />
+    </label>
+    <div class="grid">
+      <label>
+        作者
+        <input name="author" required value="${escapeHtml(data.author || "郭豪")}" />
+      </label>
+      <label>
+        作者縮寫
+        <input name="authorInitials" value="${escapeHtml(data.authorInitials || "KH")}" />
+      </label>
+    </div>
+    <div class="grid">
+      <label>
+        發布日期
+        <input name="pubDate" type="date" value="${escapeHtml(data.pubDate || new Date().toISOString().slice(0, 10))}" />
+      </label>
+      <label>
+        閱讀時間
+        <input name="readingTime" value="${escapeHtml(data.readingTime)}" placeholder="留空會自動估算" />
+      </label>
+    </div>
+    <label>
+      分類標籤
+      <input name="categories" required value="${escapeHtml(categories)}" placeholder="用逗號分隔，例如 影像生成, 工作流, 評測" />
+    </label>
+    <div class="grid">
+      <label>
+        封面圖片
+        <input name="cover" type="file" accept="image/*" />
+        <small>${data.cover ? `目前封面：${escapeHtml(data.cover)}` : "可不放。請上傳壓縮後網頁圖；原始大圖請放外部雲端。"}</small>
+      </label>
+      <label>
+        封面描述
+        <input name="coverAlt" value="${escapeHtml(data.coverAlt)}" placeholder="給搜尋與無障礙使用" />
+      </label>
+    </div>
+    <label class="checkbox">
+      <input name="featured" type="checkbox" value="true" ${data.featured === true ? "checked" : ""} />
+      設為首頁主打文章
+    </label>
+    <label>
+      文章正文
+      <textarea name="body" required placeholder="可直接貼 Markdown。小標用 ##，圖片可用 ![說明](/assets/images/file.jpg)">${escapeHtml(body)}</textarea>
+    </label>
+    <button type="submit">${buttonLabel}</button>
+  </form>`;
+}
+
+function layout({ title = "Framefield 後台", subtitle = "新增文章、封面圖與文章資料。", message = "", content = "" }) {
   return `<!doctype html>
 <html lang="zh-Hant">
   <head>
@@ -54,6 +214,15 @@ function htmlPage(message = "") {
       }
       main {
         padding-block: 42px 76px;
+      }
+      section + section {
+        margin-top: 44px;
+        padding-top: 36px;
+        border-top: 1px solid var(--line);
+      }
+      h2 {
+        margin: 0 0 18px;
+        font-size: 28px;
       }
       .notice {
         margin-bottom: 24px;
@@ -110,8 +279,54 @@ function htmlPage(message = "") {
         font: inherit;
         cursor: pointer;
       }
+      .post-list {
+        display: grid;
+        border-top: 1px solid var(--line);
+      }
+      .post-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 18px;
+        align-items: center;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .post-row strong,
+      .post-row small {
+        display: block;
+      }
+      .post-row small,
+      .empty {
+        color: var(--muted);
+      }
+      .button-link {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--ink);
+        padding: 0 16px;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .post-actions,
+      .form-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .danger-link,
+      .danger-button {
+        border-color: #ba1a1a;
+        color: #ba1a1a;
+        background: #fff;
+      }
+      .danger-button {
+        min-height: 52px;
+      }
       @media (max-width: 720px) {
         .grid { grid-template-columns: 1fr; }
+        .post-row { grid-template-columns: 1fr; }
         header { align-items: flex-start; flex-direction: column; justify-content: center; }
       }
     </style>
@@ -119,76 +334,36 @@ function htmlPage(message = "") {
   <body>
     <header>
       <div>
-        <h1>Framefield 後台</h1>
-        <p>新增文章、封面圖與文章資料。</p>
+        <h1>${escapeHtml(title)}</h1>
+        <p>${escapeHtml(subtitle)}</p>
       </div>
-      <a href="http://127.0.0.1:4321/" target="_blank" rel="noreferrer">開啟網站</a>
+      <nav>
+        <a href="/admin">回後台</a>
+        ·
+        <a href="http://127.0.0.1:4321/" target="_blank" rel="noreferrer">開啟網站</a>
+      </nav>
     </header>
     <main>
       ${message ? `<div class="notice">${message}</div>` : ""}
-      <form action="/admin/posts" method="post" enctype="multipart/form-data">
-        <div class="grid">
-          <label>
-            文章標題
-            <input name="title" required placeholder="例如：一週視覺筆記" />
-          </label>
-          <label>
-            網址代稱
-            <input name="slug" placeholder="留空會自動產生，例如 weekly-visual-notes" />
-          </label>
-        </div>
-        <label>
-          摘要
-          <input name="description" required placeholder="會出現在首頁、文章列表與 SEO 描述" />
-        </label>
-        <div class="grid">
-          <label>
-            作者
-            <input name="author" required value="郭豪" />
-          </label>
-          <label>
-            作者縮寫
-            <input name="authorInitials" value="KH" />
-          </label>
-        </div>
-        <div class="grid">
-          <label>
-            發布日期
-            <input name="pubDate" type="date" value="${new Date().toISOString().slice(0, 10)}" />
-          </label>
-          <label>
-            閱讀時間
-            <input name="readingTime" placeholder="留空會自動估算" />
-          </label>
-        </div>
-        <label>
-          分類標籤
-          <input name="categories" required placeholder="用逗號分隔，例如 影像生成, 工作流, 評測" />
-        </label>
-        <div class="grid">
-          <label>
-            封面圖片
-            <input name="cover" type="file" accept="image/*" />
-            <small>可不放。請上傳壓縮後網頁圖；原始大圖請放外部雲端。</small>
-          </label>
-          <label>
-            封面描述
-            <input name="coverAlt" placeholder="給搜尋與無障礙使用" />
-          </label>
-        </div>
-        <label class="checkbox">
-          <input name="featured" type="checkbox" value="true" />
-          設為首頁主打文章
-        </label>
-        <label>
-          文章正文
-          <textarea name="body" required placeholder="可直接貼 Markdown。小標用 ##，圖片可用 ![說明](/assets/images/file.jpg)"></textarea>
-        </label>
-        <button type="submit">發布文章</button>
-      </form>
+      ${content}
     </main>
   </body>
 </html>`;
+}
+
+async function htmlPage(message = "") {
+  const posts = await listPosts();
+  return layout({
+    message,
+    content: `<section>
+      <h2>文章列表</h2>
+      ${renderPostList(posts)}
+    </section>
+    <section>
+      <h2>新增文章</h2>
+      ${renderPostForm({ action: "/admin/posts", buttonLabel: "發布文章" })}
+    </section>`,
+  });
 }
 
 function parseMultipart(buffer, contentType) {
@@ -259,6 +434,13 @@ function estimateReadingTime(body) {
   return `${minutes} 分鐘閱讀`;
 }
 
+function parseCategories(value) {
+  return (value || "")
+    .split(/[,，]/)
+    .map((category) => category.trim())
+    .filter(Boolean);
+}
+
 async function ensureUniqueFile(baseDir, baseName, extension) {
   let filename = `${baseName}${extension}`;
   let count = 2;
@@ -287,36 +469,28 @@ async function unsetOtherFeaturedPosts() {
   );
 }
 
-async function createPost(fields, files) {
-  await mkdir(postsDir, { recursive: true });
+async function postFrontmatter(fields, files, { filename = "", existing = {} } = {}) {
   await mkdir(imagesDir, { recursive: true });
 
   const title = fields.title || "未命名文章";
-  const slug = slugify(fields.slug || title);
-  const filename = await ensureUniqueFile(postsDir, slug, ".md");
-  const postSlug = filename.replace(/\.md$/, "");
   const body = fields.body || "";
-  const categories = (fields.categories || "")
-    .split(/[,，]/)
-    .map((category) => category.trim())
-    .filter(Boolean);
+  const categories = parseCategories(fields.categories);
   const featured = fields.featured === "true";
-  let coverLine = "";
-  let coverAltLine = "";
+  const postSlug = filename ? filename.replace(/\.md$/, "") : slugify(fields.slug || title);
+  let cover = existing.cover || "";
+  let coverAlt = fields.coverAlt || existing.coverAlt || "";
 
   if (files.cover?.data?.length) {
     const extension = extname(files.cover.filename).toLowerCase() || ".jpg";
     const imageName = await ensureUniqueFile(imagesDir, postSlug, extension);
     await writeFile(join(imagesDir, imageName), files.cover.data);
-    coverLine = `cover: ${quoteYaml(`/assets/images/${imageName}`)}\n`;
-    coverAltLine = `coverAlt: ${quoteYaml(fields.coverAlt || title)}\n`;
-  } else if (fields.coverAlt) {
-    coverAltLine = `coverAlt: ${quoteYaml(fields.coverAlt)}\n`;
+    cover = `/assets/images/${imageName}`;
+    coverAlt = fields.coverAlt || title;
   }
 
   if (featured) await unsetOtherFeaturedPosts();
 
-  const frontmatter = [
+  return [
     "---",
     `title: ${quoteYaml(title)}`,
     `description: ${quoteYaml(fields.description || "")}`,
@@ -325,16 +499,87 @@ async function createPost(fields, files) {
     `authorInitials: ${quoteYaml(fields.authorInitials || (fields.author || "作者").slice(0, 2).toUpperCase())}`,
     `readingTime: ${quoteYaml(fields.readingTime || estimateReadingTime(body))}`,
     `categories: [${categories.map(quoteYaml).join(", ")}]`,
-    coverLine.trimEnd(),
-    coverAltLine.trimEnd(),
+    cover ? `cover: ${quoteYaml(cover)}` : "",
+    coverAlt ? `coverAlt: ${quoteYaml(coverAlt)}` : "",
+    existing.sourceUrl ? `sourceUrl: ${quoteYaml(existing.sourceUrl)}` : "",
     `featured: ${featured ? "true" : "false"}`,
     "---",
     "",
   ].filter(Boolean);
+}
+
+async function createPost(fields, files) {
+  await mkdir(postsDir, { recursive: true });
+
+  const title = fields.title || "未命名文章";
+  const slug = slugify(fields.slug || title);
+  const filename = await ensureUniqueFile(postsDir, slug, ".md");
+  const postSlug = filename.replace(/\.md$/, "");
+  const body = fields.body || "";
+  const frontmatter = await postFrontmatter(fields, files, { filename });
 
   await writeFile(join(postsDir, filename), `${frontmatter.join("\n")}${body.trim()}\n`);
 
   return { filename, postSlug };
+}
+
+async function updatePost(filename, fields, files) {
+  await mkdir(postsDir, { recursive: true });
+
+  const safeName = safePostFilename(filename);
+  const current = await readPost(safeName);
+  const body = fields.body || "";
+  const frontmatter = await postFrontmatter(fields, files, {
+    filename: safeName,
+    existing: current.data,
+  });
+
+  await writeFile(join(postsDir, safeName), `${frontmatter.join("\n")}${body.trim()}\n`);
+
+  return { filename: safeName, postSlug: safeName.replace(/\.md$/, "") };
+}
+
+async function deletePost(filename) {
+  const safeName = safePostFilename(filename);
+  await rm(join(postsDir, safeName));
+  return safeName;
+}
+
+async function editPage(filename, message = "") {
+  const post = await readPost(filename);
+  return layout({
+    title: "編輯文章",
+    subtitle: post.filename,
+    message,
+    content: `${renderPostForm({
+      action: `/admin/posts/${encodeURIComponent(post.filename)}`,
+      buttonLabel: "儲存修改",
+      post,
+      body: post.body,
+      isEdit: true,
+    })}
+    <section>
+      <h2>刪除文章</h2>
+      <p class="empty">刪除後會移除這篇 Markdown 文章。已上傳圖片不會自動刪除，避免影響其他文章。</p>
+      <a class="button-link danger-link" href="/admin/delete?file=${encodeURIComponent(post.filename)}">前往刪除確認</a>
+    </section>`,
+  });
+}
+
+async function deletePage(filename) {
+  const post = await readPost(filename);
+  return layout({
+    title: "刪除文章",
+    subtitle: post.filename,
+    content: `<section>
+      <h2>${escapeHtml(post.data.title || post.filename)}</h2>
+      <p class="empty">這個動作會刪除文章檔案，不能從後台復原。若只是暫時不想發布，建議先回編輯頁修改內容。</p>
+      <form class="form-actions" action="/admin/delete/${encodeURIComponent(post.filename)}" method="post">
+        <button class="danger-button" type="submit">確認刪除</button>
+        <a class="button-link" href="/admin/edit?file=${encodeURIComponent(post.filename)}">取消</a>
+      </form>
+    </section>`,
+  });
 }
 
 function collectRequestBody(request) {
@@ -348,20 +593,56 @@ function collectRequestBody(request) {
 
 const server = createServer(async (request, response) => {
   try {
-    if (request.method === "GET" && (request.url === "/" || request.url === "/admin")) {
+    const url = new URL(request.url, `http://${request.headers.host || "127.0.0.1"}`);
+
+    if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/admin")) {
       response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      response.end(htmlPage());
+      response.end(await htmlPage());
       return;
     }
 
-    if (request.method === "POST" && request.url === "/admin/posts") {
+    if (request.method === "GET" && url.pathname === "/admin/edit") {
+      response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+      response.end(await editPage(url.searchParams.get("file") || ""));
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/delete") {
+      response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+      response.end(await deletePage(url.searchParams.get("file") || ""));
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/admin/posts") {
       const body = await collectRequestBody(request);
       const { fields, files } = parseMultipart(body, request.headers["content-type"] || "");
       const post = await createPost(fields, files);
       const message = `已建立文章：<strong>${post.filename}</strong>。<a href="http://127.0.0.1:4321/articles/${post.postSlug}/" target="_blank" rel="noreferrer">開啟文章</a>`;
 
       response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      response.end(htmlPage(message));
+      response.end(await htmlPage(message));
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname.startsWith("/admin/posts/")) {
+      const filename = decodeURIComponent(url.pathname.replace("/admin/posts/", ""));
+      const body = await collectRequestBody(request);
+      const { fields, files } = parseMultipart(body, request.headers["content-type"] || "");
+      const post = await updatePost(filename, fields, files);
+      const message = `已儲存修改：<strong>${post.filename}</strong>。<a href="http://127.0.0.1:4321/articles/${post.postSlug}/" target="_blank" rel="noreferrer">開啟文章</a>`;
+
+      response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+      response.end(await editPage(post.filename, message));
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname.startsWith("/admin/delete/")) {
+      const filename = decodeURIComponent(url.pathname.replace("/admin/delete/", ""));
+      const deleted = await deletePost(filename);
+      const message = `已刪除文章：<strong>${deleted}</strong>`;
+
+      response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+      response.end(await htmlPage(message));
       return;
     }
 
@@ -369,7 +650,7 @@ const server = createServer(async (request, response) => {
     response.end("Not found");
   } catch (error) {
     response.writeHead(500, { "content-type": "text/html; charset=utf-8" });
-    response.end(htmlPage(`發生錯誤：${String(error.message || error)}`));
+    response.end(layout({ message: `發生錯誤：${String(error.message || error)}` }));
   }
 });
 

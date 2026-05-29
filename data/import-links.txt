@@ -1,3 +1,6 @@
 # Paste one article URL per line.
 # Example:
 # https://example.com/article
+https://www.vogue.com/article/chocolate-gifts-valentines-day?utm_source=chatgpt.com
+https://www.vogue.com/article/best-food-gifts?utm_source=chatgpt.com
+https://www.sciencedirect.com/science/article/pii/S2405844019312927?utm_source=chatgpt.com

@@ -53,6 +53,33 @@ npm run import:links -- https://example.com/article
 The GitHub Actions workflow `.github/workflows/daily-links.yml` can run the same
 importer manually or on a daily schedule after these changes are pushed to GitHub.
 
+## AI Draft Import
+
+Create `.env` from `.env.example` and set `OPENAI_API_KEY`.
+
+Paste article URLs into `data/import-links.txt`, then preview AI-generated
+drafts:
+
+```sh
+npm run import:ai:dry
+```
+
+Write AI-generated Markdown drafts:
+
+```sh
+npm run import:ai
+```
+
+The AI importer creates original Chinese drafts with:
+
+- SEO title and description
+- categories
+- Markdown body
+- `sourceUrl`
+- a cover image prompt saved inside the article
+
+It does not generate images yet. Review drafts before publishing.
+
 ## Content Asset Rules
 
 Read [CONTENT_ASSETS.md](./CONTENT_ASSETS.md) before uploading many articles,

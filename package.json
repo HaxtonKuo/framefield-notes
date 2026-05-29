@@ -8,6 +8,8 @@
     "admin": "node scripts/admin-server.mjs",
     "import:links": "node scripts/import-links.mjs",
     "import:links:dry": "node scripts/import-links.mjs --dry-run",
+    "import:ai": "node scripts/import-ai-posts.mjs",
+    "import:ai:dry": "node scripts/import-ai-posts.mjs --dry-run",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "astro": "astro"
