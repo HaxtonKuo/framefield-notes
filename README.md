@@ -1,7 +1,7 @@
-# Framefield Notes
+# 悟飯老師｜kouhan
 
-This Astro content site keeps article writing in Markdown and generates the homepage,
-archive, and long-form article pages from the same post data.
+This Astro content site powers kouhan, an AI design notes and prompt workflow
+publication managed with Markdown, GitHub, Vercel, and a protected admin page.
 
 ## Run
 

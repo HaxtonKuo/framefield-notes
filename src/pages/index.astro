@@ -11,8 +11,8 @@ const cards = posts.filter((post) => post.id !== lead.id).slice(0, 3);
 ---
 
 <BaseLayout
-  title="Framefield Notes | AI 創作內容站"
-  description="Framefield Notes 是一個以 Markdown 管理文章的 AI 創作內容站。"
+  title="悟飯老師｜kouhan AI 設計筆記"
+  description="悟飯老師整理 AI 設計、影像生成、Prompt 與內容工作流，累積可實作的創作筆記。"
 >
   <main>
     <section class="front-grid">
@@ -61,9 +61,9 @@ const cards = posts.filter((post) => post.id !== lead.id).slice(0, 3);
       <div class="section-head">
         <div>
           <p class="eyebrow">編輯選讀</p>
-          <h2>文章現在從 Markdown 自動長出來</h2>
+          <h2>把 AI 工具放進真實設計流程</h2>
         </div>
-        <p>首頁卡片會讀取文章標題、摘要、分類與封面，後續更新不必再改多份 HTML。</p>
+        <p>從參考文章、案例觀察、Prompt 到素材交付，整理成可以反覆使用的內容資產。</p>
       </div>
       <div class="story-grid">
         {cards.map((post) => <PostCard post={post} />)}
@@ -88,7 +88,7 @@ const cards = posts.filter((post) => post.id !== lead.id).slice(0, 3);
       </a>
       <a href="/about/">
         <span>04</span>
-        <strong>編輯室</strong>
+        <strong>悟飯老師</strong>
         <small>作者與合作</small>
       </a>
     </section>

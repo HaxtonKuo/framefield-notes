@@ -168,13 +168,13 @@ function renderPostForm({ action, buttonLabel, post = {}, body = "", isEdit = fa
   </form>`;
 }
 
-function layout({ title = "Framefield 後台", subtitle = "新增文章、封面圖與文章資料。", message = "", content = "" }) {
+function layout({ title = "悟飯老師後台", subtitle = "新增文章、封面圖與文章資料。", message = "", content = "" }) {
   return `<!doctype html>
 <html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Framefield 後台</title>
+    <title>悟飯老師後台</title>
     <style>
       :root {
         --ink: #101010;
@@ -655,5 +655,5 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Framefield admin is running at http://127.0.0.1:${port}/admin`);
+  console.log(`悟飯老師後台 is running at http://127.0.0.1:${port}/admin`);
 });

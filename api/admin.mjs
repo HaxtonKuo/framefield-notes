@@ -337,7 +337,7 @@ async function savePost(payload) {
 async function fetchSource(url) {
   const response = await fetch(url, {
     headers: {
-      "user-agent": "FramefieldBot/1.0 (+https://framefield-notes.vercel.app)",
+      "user-agent": "kouhanBot/1.0 (+https://framefield-notes.vercel.app)",
       accept: "text/html,application/xhtml+xml",
     },
   });
@@ -364,7 +364,7 @@ async function generateDraft({ url, title, description, articleText }) {
   assertAiConfig();
 
   const prompt = [
-    "你是 Framefield Notes 的中文內容編輯。",
+    "你是「悟飯老師｜kouhan」的中文內容編輯。",
     "根據來源資訊，產生一篇繁體中文原創草稿，但不要寫成原文摘要。",
     "請把來源文章當成選題靈感，改寫成 2026 年視角的趨勢觀察、內容策略或設計工作流文章。",
     "可以使用 2026 作為標題年份，但只能寫趨勢、方法、選題角度與可執行建議；不要編造 2026 真實新品、品牌排名、價格或實際上市資訊。",
