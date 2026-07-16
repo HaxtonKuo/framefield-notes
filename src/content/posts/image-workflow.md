@@ -6,7 +6,7 @@ updatedDate: 2026-05-22
 author: "郭豪"
 authorInitials: "KH"
 readingTime: "8 分鐘閱讀"
-categories: ["影像生成", "工作流", "可替換稿"]
+categories: ["影像生成", "工作流", "AI 設計"]
 cover: "/assets/images/hero-workflow.jpg"
 coverAlt: "AI 創作流程示意的桌面照片"
 featured: true

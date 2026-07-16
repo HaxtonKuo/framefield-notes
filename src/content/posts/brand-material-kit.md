@@ -2,8 +2,8 @@
 title: "小團隊如何先做一組能測方向的品牌素材"
 description: "先用一組核心圖像測版型與敘事，再擴充完整商品頁素材。"
 pubDate: 2026-05-12
-author: "周未央"
-authorInitials: "ZW"
+author: "悟飯老師"
+authorInitials: "KH"
 readingTime: "6 分鐘閱讀"
 categories: ["品牌案例", "商品頁"]
 cover: "/assets/images/packaging-lab.jpg"

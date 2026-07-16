@@ -2,8 +2,8 @@
 title: "一週視覺筆記：更清楚的資訊與更真實的質感"
 description: "用每週筆記整理值得觀察的視覺方向，適合做成固定更新欄目。"
 pubDate: 2026-05-18
-author: "楊知夏"
-authorInitials: "YX"
+author: "悟飯老師"
+authorInitials: "KH"
 readingTime: "5 分鐘閱讀"
 categories: ["靈感週報", "趨勢"]
 cover: "/assets/images/studio-notes.jpg"

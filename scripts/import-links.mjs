@@ -149,7 +149,7 @@ async function uniquePostFilename(slug) {
 async function fetchArticle(url) {
   const response = await fetch(url, {
     headers: {
-      "user-agent": "FramefieldBot/1.0 (+https://framefield-notes.vercel.app)",
+      "user-agent": "kouhanBot/1.0 (+https://framefield-notes.vercel.app)",
       accept: "text/html,application/xhtml+xml",
     },
   });
